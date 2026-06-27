@@ -1,11 +1,15 @@
 import core, os
-from flask import Flask,current_app,Response
+from flask import Flask,current_app,Response,render_template
 
 app = Flask(__name__)
 print("Creating EventHandler in PID", os.getpid())
 app.eventhandler = core.EventHandler("recv")
 
 @app.route("/")
+def main():
+    return render_template("main.html")
+
+@app.route("/api/events")
 def event_handler():
     def stream():
         for x in current_app.eventhandler.itterate_events():

@@ -32,6 +32,7 @@ class Levels:
 
 class Events:
     ESTOP = {"level":Levels.ERROR,"msg":"Estop has been triggered"}
+    INIT_DONE = {"level":Levels.STATUS, "msg":"cnc initalised", "status":"init"}
     ### expand as needed
 
     @staticmethod
