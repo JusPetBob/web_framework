@@ -1,11 +1,11 @@
-import redis, json
+import redis, json, os
 from typing import Literal
 
 class EventHandler:
     conntext:redis.Redis
     type:Literal["send", "recv"]
     def __init__(self,_type:Literal["send", "recv"]):
-        self.conntext = redis.Redis(host='localhost', port=6379, db=0)
+        self.conntext = redis.Redis(host=os.environ["redis_host"], port=6379, db=0)
         self.type = _type
         if _type == "recv":
             self.conn = self.conntext.pubsub()

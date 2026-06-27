@@ -1,6 +1,10 @@
 import core, os
 from flask import Flask,current_app,Response,render_template
 
+if __name__ == "__main__":
+    import dotenv
+    dotenv.load_dotenv()
+
 app = Flask(__name__)
 print("Creating EventHandler in PID", os.getpid())
 app.eventhandler = core.EventHandler("recv")
@@ -19,6 +23,9 @@ def event_handler():
     return Response(stream(), mimetype="text/event-stream")
 
 if __name__ == "__main__":
+    import dotenv
+    dotenv.load_dotenv()
+    
     try:
         app.run(port=8000,debug=True,use_reloader=True)
     finally:

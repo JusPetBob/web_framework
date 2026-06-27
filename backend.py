@@ -1,6 +1,9 @@
 import core
 
 if __name__=="__main__":
+    import dotenv
+    dotenv.load_dotenv()
+
     eventH = core.EventHandler("send")
     eventH.raise_event(core.Events.INIT_DONE) # == core.Events.get_custom("STATUS","cnc initalised",status="init"))
     

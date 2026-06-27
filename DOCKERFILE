@@ -1,0 +1,13 @@
+FROM python:3.14.6-alpine3.24
+
+COPY requirements.txt /
+
+RUN pip install -r requirements.txt
+
+COPY app.py /
+COPY core/ /core/
+COPY templates/ /templates/
+
+ENV redis_host=redis
+EXPOSE 8000
+CMD ["python3", "-m", "gunicorn", "-w", "8", "-p", "8000", "--worker-class", "gevent", "app:app"]
