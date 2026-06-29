@@ -35,7 +35,7 @@ def storage(path:str):
             
         l = [{"name":i, "path":"/api/storage/"+path+"/"+i, "type":"file" if os.path.isfile(root_path+i) else "folder"} for i in os.listdir(root_path)]
         
-        return l
+        return Response(l, mimetype="application/json")
 
 
 @app.route("/api/events")
