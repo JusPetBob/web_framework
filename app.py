@@ -48,9 +48,6 @@ def event_handler():
     return Response(stream(), mimetype="text/event-stream")
 
 if __name__ == "__main__":
-    import dotenv
-    dotenv.load_dotenv()
-    
     try:
         app.run(port=8000,debug=True,use_reloader=True)
     finally:
