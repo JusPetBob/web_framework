@@ -7,7 +7,7 @@ if __name__ == "__main__":
 
 app = Flask(__name__)
 print("Creating EventHandler in PID", os.getpid())
-app.eventhandler = core.EventHandler("recv")
+#app.eventhandler = core.EventHandler("recv")
 
 
 @app.route("/")
