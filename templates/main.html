@@ -3,7 +3,7 @@
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
-<html>
+<html style="display: inline-block; height: 100%; width: 100%;">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -12,11 +12,157 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="">
     </head>
-    <body>
+    <body style="display: flex; height: 100%; width: 100%; align-items: center; justify-content: center; overflow: hidden;">
         <!--[if lt IE 7]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
+
+        <p style="position: fixed; display: block; left: 0; top: 0; margin: 5px;" id="output">
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        </p>
+
+        <div style="display: flex; position: fixed; background-color: rgb(172, 172, 172); width: 800px; height: 500px;">
+            <div style="flex: 1;" id="driveList">
+                <button style="display: inline-block; width: 100%; height: 25px;" id="driveBack">
+                    Back
+                </button>
+            </div>
+            <div style="flex: 5; overflow-y: scroll;" id="driveDataList">
+            </div>
+        </div>
         
         <script src="" async defer></script>
+        <script>
+            const baseURL = 'http://127.0.0.1:8000'     // Put our actual host URL here later
+            const API_STORAGE = '/api/storage/'         // Path under which our storage is
+
+            // Random ass Url reader from Stack Overflow
+            async function getUrlContent(url, isFile) {
+                try {
+                    // Validate that the input is a valid URL
+                    new URL(url); // Throws if invalid
+
+                    const response = await fetch(url);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    let data;
+                    if (isFile === true) {
+                        data = await response.text();
+                    } else {
+                        data = await response.json();
+                    }
+                    return data;
+                } catch (error) {
+                    console.error("Failed to fetch URL content:", error.message);
+                    return null;
+                };
+            };
+
+            async function getDrive(response) {
+                /*
+                    Expect:
+                    C to be the main Drive
+                    D the secondary drive
+                    F could be a CD reader
+                */
+                let reservedDrives = ['C', 'D', 'F'];
+                let availableDrives = [];
+                let selectedDrive = 'E/'; // Default to E
+
+                function loadDriveData(driveData) {
+                    const driveDataList = document.getElementById('driveDataList')
+                    driveDataList.innerHTML = ''
+                    for (let i = 0; i < driveData.length; i++) {
+                        const newDriveButton = document.createElement('button');
+                        newDriveButton.style = 'display: flex; align-items: center; width: 100%; text-align: left; margin: 0; height: 25px;';
+
+                        const span1 = document.createElement('span')
+                        const span2 = document.createElement('span')
+
+                        span1.style = 'display: inline-block; overflow-x: hidden; text-overflow: ellipsis; max-width: calc(100% - 100px); flex: 10;';
+                        span2.style = 'position: relative; display: inline-block; text-align: right; flex: 1; justify-self: flex-end;';
+
+                        span1.innerText = driveData[i].name;
+                        span2.innerText = driveData[i].type;
+
+                        newDriveButton.appendChild(span1);
+                        newDriveButton.appendChild(span2);
+                        
+                        driveDataList.appendChild(newDriveButton);
+
+                        newDriveButton.addEventListener('pointerup', async (event) => {
+                            // Destinguish between file or path (folder content)
+                            if (driveData[i].type === 'file') {
+                                const fileContent = await getUrlContent(baseURL + driveData[i].path, true);
+                                
+                                const output = document.getElementById('output');
+                                output.innerText = fileContent;
+                            } else {
+                                const pathData = await getUrlContent(baseURL + driveData[i].path);
+                                selectedDrive += `${driveData[i].name}/`
+                                selectedDriveName = `${driveData[i].name}/`
+                                loadDriveData(pathData);
+                                console.log(selectedDrive)
+                            }
+                        });
+                    };
+                }
+
+                function createDriveButton(name) {
+                    const newButton = document.createElement('button');
+                    newButton.style = 'display: inline-block; text-align: left; width: 100%; height: 25px;';
+                    newButton.innerText = name;
+
+                    document.getElementById('driveList').appendChild(newButton);
+                    return newButton;
+                };
+                
+                for (let i = 0; i < response.length; i++) {
+                    if (!reservedDrives.find((drive) => drive === response[i])) {
+                        // Important to shift because of the System Volume Information
+                        const drive = await getUrlContent(baseURL + API_STORAGE + response[i] + '\\'); drive.shift();
+                        availableDrives[response[i]] = drive;
+                        const driveButton = createDriveButton('Drive ' + response[i]);
+
+                        // We love recursion !!!
+                        driveButton.addEventListener('pointerup', (event) => {
+                            selectedDrive = response[i] + '/';
+                            loadDriveData(availableDrives[response[i]]);
+                        });
+                    };
+                };
+
+                document.getElementById('driveBack').addEventListener('pointerup', async (event) => {
+                    // Check if we are at the root, if so then return
+                    if (availableDrives[selectedDrive.slice(0, -1)]) {
+                        return;
+                    };
+
+                    const correctedPath = selectedDrive.slice(0, -1);
+                    const oldPath = correctedPath.slice(0, correctedPath.lastIndexOf('/'));
+                    const oldDrive = await getUrlContent(baseURL + API_STORAGE + oldPath);
+                    // shift out the 'System Volume Information' incase it is the root
+                    if (oldPath.length === 1) { oldDrive.shift(); };
+
+                    selectedDrive = oldPath + '/';
+                    loadDriveData(oldDrive);
+                });
+
+                //Load default option (Idk if this can fail, but I am to lazy to have a safe option)
+                loadDriveData(availableDrives[selectedDrive.slice(0, -1)]);
+            };
+            
+            // Helper function to await the response of our API
+            async function onLoad() {
+                const response = await getUrlContent(baseURL + API_STORAGE);
+                getDrive(response);
+            }
+
+            // Initialise on start
+            onLoad()
+        </script>
     </body>
 </html>
