@@ -17,9 +17,7 @@
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
 
-        <p style="position: fixed; display: block; left: 0; top: 0; margin: 5px;" id="output">
-            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-        </p>
+        <p style="position: fixed; display: block; left: 0; top: 0; margin: 5px;" id="output"></p>
 
         <div style="display: flex; position: fixed; background-color: rgb(172, 172, 172); width: 800px; height: 500px;">
             <div style="flex: 1;" id="driveList">
@@ -87,12 +85,12 @@
 
                         span1.innerText = driveData[i].name;
                         span2.innerText = driveData[i].type;
-
+                        
                         newDriveButton.appendChild(span1);
                         newDriveButton.appendChild(span2);
                         
                         driveDataList.appendChild(newDriveButton);
-
+                        
                         newDriveButton.addEventListener('pointerup', async (event) => {
                             // Destinguish between file or path (folder content)
                             if (driveData[i].type === 'file') {
@@ -101,11 +99,11 @@
                                 const output = document.getElementById('output');
                                 output.innerText = fileContent;
                             } else {
+                                // We love recursion !!!
                                 const pathData = await getUrlContent(baseURL + driveData[i].path);
                                 selectedDrive += `${driveData[i].name}/`
                                 selectedDriveName = `${driveData[i].name}/`
                                 loadDriveData(pathData);
-                                console.log(selectedDrive)
                             }
                         });
                     };
@@ -127,7 +125,6 @@
                         availableDrives[response[i]] = drive;
                         const driveButton = createDriveButton('Drive ' + response[i]);
 
-                        // We love recursion !!!
                         driveButton.addEventListener('pointerup', (event) => {
                             selectedDrive = response[i] + '/';
                             loadDriveData(availableDrives[response[i]]);
