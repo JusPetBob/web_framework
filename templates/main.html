@@ -71,6 +71,9 @@
                 let selectedDrive = 'E/'; // Default to E
 
                 function loadDriveData(driveData) {
+                    // Maybe add a check in which it will find the very first available drive if E doesn't exist
+                    if (!driveData) { return; };
+                    
                     const driveDataList = document.getElementById('driveDataList')
                     driveDataList.innerHTML = ''
                     for (let i = 0; i < driveData.length; i++) {
