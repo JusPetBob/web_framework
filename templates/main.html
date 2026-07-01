@@ -31,8 +31,8 @@
         
         <script src="" async defer></script>
         <script>
-            const baseURL = 'http://127.0.0.1:8000'     // Put our actual host URL here later
-            const API_STORAGE = '/api/storage/'         // Path under which our storage is
+            const baseURL = 'http://127.0.0.1:8000/';     // Put our actual host URL here later
+            const API_STORAGE = 'api/storage/';           // Path under which our storage is
 
             // Random ass Url reader from Stack Overflow
             async function getUrlContent(url, isFile) {
@@ -41,7 +41,6 @@
                     new URL(url); // Throws if invalid
 
                     const response = await fetch(url);
-
                     if (!response.ok) {
                         throw new Error(`HTTP error! Status: ${response.status}`);
                     }
@@ -73,21 +72,32 @@
                 function loadDriveData(driveData) {
                     // Maybe add a check in which it will find the very first available drive if E doesn't exist
                     if (!driveData) { return; };
-                    
-                    const driveDataList = document.getElementById('driveDataList')
-                    driveDataList.innerHTML = ''
+
+                    const driveDataList = document.getElementById('driveDataList');
+                    driveDataList.innerHTML = '';
+
                     for (let i = 0; i < driveData.length; i++) {
                         const newDriveButton = document.createElement('button');
                         newDriveButton.style = 'display: flex; align-items: center; width: 100%; text-align: left; margin: 0; height: 25px;';
 
-                        const span1 = document.createElement('span')
-                        const span2 = document.createElement('span')
+                        const span1 = document.createElement('span');
+                        const span2 = document.createElement('span');
 
-                        span1.style = 'display: inline-block; overflow-x: hidden; text-overflow: ellipsis; max-width: calc(100% - 100px); flex: 10;';
-                        span2.style = 'position: relative; display: inline-block; text-align: right; flex: 1; justify-self: flex-end;';
+                        span1.style = 'display: inline-block; overflow-x: hidden; text-overflow: ellipsis; max-width: calc(100% - 65px); flex: 10;';
+                        span2.style = 'position: relative; display: inline-block; text-align: left; flex: 1; justify-self: flex-end;';
 
-                        span1.innerText = driveData[i].name;
-                        span2.innerText = driveData[i].type;
+                        let fileName, fileType;
+                        fileName = driveData[i].name;
+                        fileType = `<b>${driveData[i].type}</b>`;
+
+                        // Now we can display the file type seperately and maybe use this for icons
+                        if (fileName.includes('.') && (fileName.lastIndexOf('.') !== 0)) {
+                            fileType = fileName.slice(fileName.lastIndexOf('.'));
+                            fileName = fileName.slice(0, fileName.lastIndexOf('.'));
+                        };
+
+                        span1.innerHTML = fileName;
+                        span2.innerHTML = fileType;
                         
                         newDriveButton.appendChild(span1);
                         newDriveButton.appendChild(span2);
@@ -104,13 +114,13 @@
                             } else {
                                 // We love recursion !!!
                                 const pathData = await getUrlContent(baseURL + driveData[i].path);
-                                selectedDrive += `${driveData[i].name}/`
-                                selectedDriveName = `${driveData[i].name}/`
+                                selectedDrive += `${driveData[i].name}/`;
+                                selectedDriveName = `${driveData[i].name}/`;
                                 loadDriveData(pathData);
                             }
                         });
                     };
-                }
+                };
 
                 function createDriveButton(name) {
                     const newButton = document.createElement('button');
