@@ -1,14 +1,15 @@
 import core, os, json
 from flask import Flask,current_app,Response,render_template,send_file
+from flask_cors import CORS
 
 if __name__ == "__main__":
     import dotenv
     dotenv.load_dotenv()
 
 app = Flask(__name__)
+CORS(app)
 print("Creating EventHandler in PID", os.getpid())
 #app.eventhandler = core.EventHandler("recv")
-
 
 @app.route("/")
 def main():
@@ -19,20 +20,26 @@ def main():
 @app.route("/api/storage/<path:path>")
 def storage(path:str):
     if path == "":
-        return [i.removesuffix(":\\") for i in os.listdrives()]
+        if os.name == "nt":
+            return [i.removesuffix(":\\") for i in os.listdrives()]
+        else:
+            return os.listdir("/mnt")
     
     path = path.removesuffix("/")
     p = path.split("/")
-    p[0] += ":"
-    
-    root_path = "\\".join(p).removesuffix("\\")
+    if os.name == "nt":
+        p[0] += ":"
+        root_path = "/".join(p).removesuffix("/")
+    else:
+        p = ["mnt"] + p
+        root_path = "/" + "/".join(p).removesuffix("/")
     
     if os.path.isfile(root_path):        
         return send_file(root_path, "text")
     
     else:
-        root_path += "\\"
-            
+        root_path += "/"
+        root_path = os.path.normpath(root_path)
         l = [{"name":i, "path":"/api/storage/"+path+"/"+i, "type":"file" if os.path.isfile(root_path+i) else "folder"} for i in os.listdir(root_path)]
         
         return l
