@@ -34,12 +34,13 @@ def storage(path:str):
         p = ["mnt"] + p
         root_path = "/" + "/".join(p).removesuffix("/")
     
+    root_path = os.path.normpath(root_path)
+    
     if os.path.isfile(root_path):        
         return send_file(root_path, "text")
     
     else:
         root_path += "/"
-        root_path = os.path.normpath(root_path)
         l = [{"name":i, "path":"/api/storage/"+path+"/"+i, "type":"file" if os.path.isfile(root_path+i) else "folder"} for i in os.listdir(root_path)]
         
         return l
