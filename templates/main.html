@@ -60,12 +60,9 @@
 
             async function getDrive(response) {
                 /*
-                    Expect:
-                    C to be the main Drive
-                    D the secondary drive
-                    F could be a CD reader
+                    Expect: 
+                    expect nothing backend carries
                 */
-                let reservedDrives = ['C', 'D', 'F'];
                 let availableDrives = [];
                 let selectedDrive = 'E/'; // Default to E
 
@@ -132,17 +129,15 @@
                 };
                 
                 for (let i = 0; i < response.length; i++) {
-                    if (!reservedDrives.find((drive) => drive === response[i])) {
-                        // Important to shift because of the System Volume Information
-                        const drive = await getUrlContent(baseURL + API_STORAGE + response[i] + '\\'); drive.shift();
-                        availableDrives[response[i]] = drive;
-                        const driveButton = createDriveButton('Drive ' + response[i]);
+                    // Important to shift because of the System Volume Information
+                    const drive = await getUrlContent(baseURL + API_STORAGE + response[i] + '\\'); drive.shift();
+                    availableDrives[response[i]] = drive;
+                    const driveButton = createDriveButton('Drive ' + response[i]);
 
-                        driveButton.addEventListener('pointerup', (event) => {
-                            selectedDrive = response[i] + '/';
-                            loadDriveData(availableDrives[response[i]]);
-                        });
-                    };
+                    driveButton.addEventListener('pointerup', (event) => {
+                        selectedDrive = response[i] + '/';
+                        loadDriveData(availableDrives[response[i]]);
+                    });
                 };
 
                 document.getElementById('driveBack').addEventListener('pointerup', async (event) => {

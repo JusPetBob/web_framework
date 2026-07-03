@@ -54,4 +54,5 @@ if __name__ == "__main__":
     try:
         app.run(port=8000,debug=True,use_reloader=True)
     finally:
-        app.eventhandler.close()
+        if "eventhandler" in dir(app):
+            app.eventhandler.close()
